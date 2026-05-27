@@ -141,6 +141,7 @@
          (meta-agent-shell--dispatchers nil)
          (meta-agent-shell--allowed-targets nil)
          (meta-agent-shell-restrict-targets nil)
+         (meta-agent-shell-default-session-policy 'auto)
          (meta-agent-shell-before-start-hook nil)
          (meta-agent-shell-after-start-hook nil)
          (meta-agent-shell-start-context nil)
@@ -769,6 +770,35 @@ Optional PROJECT-PATH sets the default-directory."
             (mode-id-fn (map-elt (plist-get call :config) :default-session-mode-id)))
        (should (functionp mode-id-fn))
        (should (equal "auto" (funcall mode-id-fn)))))))
+
+(ert-deftest meta-agent-shell-test-default-start-function-uses-custom-default-session-policy ()
+  "Test the wrapper applies `meta-agent-shell-default-session-policy'."
+  (meta-agent-shell-test--with-clean-state
+   (let ((meta-agent-shell-default-session-policy 'safe)
+         (meta-agent-shell-test--agent-shell-config
+          '((:identifier . claude-code)
+            (:buffer-name . "Claude Code")))
+         (default-directory "/tmp/normal-project/"))
+     (meta-agent-shell-default-start-function 'use-current-dir "Worker")
+     (let* ((call (car meta-agent-shell-test--agent-shell-start-calls))
+            (mode-id-fn (map-elt (plist-get call :config) :default-session-mode-id)))
+       (should (functionp mode-id-fn))
+       (should (equal "dontAsk" (funcall mode-id-fn)))))))
+
+(ert-deftest meta-agent-shell-test-default-start-function-preserves-provider-default-when-custom-default-policy-is-nil ()
+  "Test a nil `meta-agent-shell-default-session-policy' keeps the provider default."
+  (meta-agent-shell-test--with-clean-state
+   (let ((meta-agent-shell-default-session-policy nil)
+         (meta-agent-shell-test--agent-shell-config
+          '((:identifier . codex)
+            (:buffer-name . "Codex")
+            (:default-session-mode-id . (lambda () "full-access"))))
+         (default-directory "/tmp/normal-project/"))
+     (meta-agent-shell-default-start-function 'use-current-dir "Worker")
+     (let* ((call (car meta-agent-shell-test--agent-shell-start-calls))
+            (mode-id-fn (map-elt (plist-get call :config) :default-session-mode-id)))
+       (should (functionp mode-id-fn))
+       (should (equal "full-access" (funcall mode-id-fn)))))))
 
 (ert-deftest meta-agent-shell-test-default-start-function-explicit-mode-id-overrides-policy ()
   "Test explicit raw mode ids take precedence over abstract policy mapping."

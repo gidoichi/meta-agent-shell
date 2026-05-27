@@ -67,6 +67,17 @@ If you've messaged the meta session within this time, heartbeat is delayed."
   :type 'string
   :group 'meta-agent-shell)
 
+(defcustom meta-agent-shell-default-session-policy 'auto
+  "Default abstract session policy for package-managed starts.
+
+Nil means preserve the provider's configured default session mode."
+  :type '(choice
+          (const :tag "No default" nil)
+          (const safe)
+          (const auto)
+          (const aggressive))
+  :group 'meta-agent-shell)
+
 (defcustom meta-agent-shell-start-function #'meta-agent-shell-default-start-function
   "Function to start a new agent-shell session.
 Defaults to `meta-agent-shell-default-start-function', a package-owned
@@ -211,9 +222,7 @@ resolved `agent-shell' config before calling `agent-shell-start'.")
   "Dynamically bound abstract session policy for the current session start.
 
 Supported values are `safe', `auto', `aggressive', or nil. The default wrapper
-binds this to `auto' for package-managed starts, and translates any non-nil
-value to a provider-specific session mode id using
-`meta-agent-shell-session-mode-map'.")
+binds this to `meta-agent-shell-default-session-policy'.")
 
 (defvar meta-agent-shell-start-session-mode-id nil
   "Dynamically bound raw session mode override for the current session start.
@@ -572,7 +581,7 @@ Optional BUFFER-NAME overrides the config buffer name."
   (let* ((use-current-dir (eq arg 'use-current-dir))
          (meta-agent-shell-start-directory default-directory)
          (meta-agent-shell-start-buffer-name buffer-name)
-         (meta-agent-shell-start-session-policy 'auto)
+         (meta-agent-shell-start-session-policy meta-agent-shell-default-session-policy)
          (meta-agent-shell-start-session-mode-id nil)
          (meta-agent-shell-start-command-prefix nil)
          (meta-agent-shell-start-path-resolver-function nil)
