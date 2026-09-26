@@ -772,7 +772,7 @@ Optional PROJECT-PATH sets the default-directory."
      (let* ((call (car meta-agent-shell-test--agent-shell-start-calls))
             (mode-id-fn (map-elt (plist-get call :config) :default-session-mode-id)))
        (should (functionp mode-id-fn))
-       (should (equal "auto" (funcall mode-id-fn)))))))
+       (should (equal "agent" (funcall mode-id-fn)))))))
 
 (ert-deftest meta-agent-shell-test-default-start-function-uses-custom-default-session-policy ()
   "Test the wrapper applies `meta-agent-shell-default-session-policy'."

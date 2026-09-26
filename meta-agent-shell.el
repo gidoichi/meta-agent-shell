@@ -116,7 +116,7 @@ remain available for post-start setup."
 
 (defcustom meta-agent-shell-session-mode-map
   '((claude-code :safe "dontAsk" :auto "default" :aggressive "bypassPermissions")
-    (codex :safe "read-only" :auto "auto" :aggressive "full-access"))
+    (codex :safe "read-only" :auto "agent" :aggressive "agent-full-access"))
   "Mapping from provider identifier and abstract policy to session mode id.
 
 Each entry is of the form:
