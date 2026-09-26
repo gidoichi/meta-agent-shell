@@ -1187,12 +1187,7 @@ Returns the buffer name of the new session, or nil if folder doesn't exist."
                 (apply #'meta-agent-shell--call-start-function
                        meta-agent-shell-start-function-args))
           (when initial-message
-            (run-at-time 0.5 nil
-                         (lambda (buf msg)
-                           (when (buffer-live-p buf)
-                             (with-current-buffer buf
-                               (shell-maker-submit :input msg))))
-                         buf initial-message))
+            (agent-shell-insert :text initial-message :submit t :no-focus t :shell-buffer buf))
           (buffer-name buf))
       (message "Directory does not exist: %s" dir)
       nil)))
@@ -1277,12 +1272,7 @@ Note: `meta-agent-shell-start-function' must:
             (when initial-message
               (puthash actual-buffer-name initial-message
                        meta-agent-shell--initial-tasks)
-              (run-at-time 0.5 nil
-                           (lambda (buf msg)
-                             (when (buffer-live-p buf)
-                               (with-current-buffer buf
-                                 (shell-maker-submit :input msg))))
-                           buf initial-message))
+              (agent-shell-insert :text initial-message :submit t :no-focus t :shell-buffer buf))
             actual-buffer-name))
       (message "Directory does not exist: %s" dir)
       nil)))
