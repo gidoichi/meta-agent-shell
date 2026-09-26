@@ -73,6 +73,10 @@
     nil)
   (defun agent-shell-interrupt (&optional _force)
     "Stub for interrupt."
+    nil)
+  (cl-defun agent-shell-insert (&key text submit no-focus shell-buffer)
+    "Stub for insert."
+    (ignore text submit no-focus shell-buffer)
     nil))
 
 (unless (featurep 'shell-maker)
