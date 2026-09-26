@@ -34,6 +34,7 @@
   (defvar agent-shell-cwd-function nil)
   (defvar agent-shell-command-prefix nil)
   (defvar agent-shell-path-resolver-function nil)
+  (defvar agent-shell-session-strategy 'prompt)
   (defun agent-shell (&optional _arg)
     "Stub for agent-shell."
     (get-buffer-create "*agent-shell*"))
@@ -43,6 +44,7 @@
                            (funcall agent-shell-cwd-function)))
            (call (list :config config
                        :outgoing-request-decorator outgoing-request-decorator
+                       :session-strategy agent-shell-session-strategy
                        :cwd-function-value cwd-value
                        :command-prefix agent-shell-command-prefix
                        :path-resolver-function agent-shell-path-resolver-function))
@@ -701,6 +703,7 @@ Optional PROJECT-PATH sets the default-directory."
      (let* ((call (car meta-agent-shell-test--agent-shell-start-calls))
             (config (plist-get call :config)))
        (should (equal "Worker" (map-elt config :buffer-name)))
+       (should (eq 'new (plist-get call :session-strategy)))
        (should (equal :unset (or (plist-get call :cwd-function-value) :unset)))))))
 
 (ert-deftest meta-agent-shell-test-default-start-function-use-current-dir-mode ()

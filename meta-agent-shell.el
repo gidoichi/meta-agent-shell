@@ -5,7 +5,7 @@
 ;; Author: Elle Najt
 ;; URL: https://github.com/ElleNajt/meta-agent-shell
 ;; Version: 0.1.0
-;; Package-Requires: ((emacs "29.1") (agent-shell "0.46.1"))
+;; Package-Requires: ((emacs "29.1") (agent-shell "0.49.1"))
 ;; Keywords: convenience, tools, ai
 
 ;; This file is not part of GNU Emacs.
@@ -609,7 +609,9 @@ Optional BUFFER-NAME overrides the config buffer name."
         (setq config (map-insert config :default-session-mode-id
                                  (lambda () session-mode-id))))
       (let* ((default-directory directory)
-             (buf (agent-shell-start :config config)))
+             (buf (cl-letf (((default-value 'agent-shell-session-strategy)
+                             'new))
+                    (agent-shell-start :config config))))
         (when (buffer-live-p buf)
           (with-current-buffer buf
             (when use-current-dir
