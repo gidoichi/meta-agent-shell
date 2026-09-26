@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# agent-shell-cloes - Close an agent session
+# Usage: agent-shell-close "buffer-name"
+
+if [ $# -lt 1 ] || [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
+    echo "Usage: agent-shell-close \"buffer-name\"" >&2
+    exit 1
+fi
+
+target="$1"
+
+# Escape for elisp: backslashes first, then quotes
+escaped_target=$(printf '%s' "$target" | sed 's/\\/\\\\/g; s/"/\\"/g')
+
+result=$(emacsclient --eval "(meta-agent-shell-close-session \"$escaped_target\" $$)" 2>&1)
+
+if [ "$result" != "t" ]; then
+    echo "ERROR: Failed to close session - $result" >&2
+    exit 1
+fi
+
+echo "Closed $target"
