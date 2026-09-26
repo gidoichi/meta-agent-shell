@@ -5,7 +5,7 @@
 ;; Author: Elle Najt
 ;; URL: https://github.com/ElleNajt/meta-agent-shell
 ;; Version: 0.1.0
-;; Package-Requires: ((emacs "29.1") (agent-shell "0.46.1"))
+;; Package-Requires: ((emacs "29.1") (agent-shell "0.49.1"))
 ;; Keywords: convenience, tools, ai
 
 ;; This file is not part of GNU Emacs.
@@ -116,7 +116,7 @@ remain available for post-start setup."
 
 (defcustom meta-agent-shell-session-mode-map
   '((claude-code :safe "dontAsk" :auto "default" :aggressive "bypassPermissions")
-    (codex :safe "read-only" :auto "auto" :aggressive "full-access"))
+    (codex :safe "read-only" :auto "agent" :aggressive "agent-full-access"))
   "Mapping from provider identifier and abstract policy to session mode id.
 
 Each entry is of the form:
@@ -609,7 +609,9 @@ Optional BUFFER-NAME overrides the config buffer name."
         (setq config (map-insert config :default-session-mode-id
                                  (lambda () session-mode-id))))
       (let* ((default-directory directory)
-             (buf (agent-shell-start :config config)))
+             (buf (cl-letf (((default-value 'agent-shell-session-strategy)
+                             'new))
+                    (agent-shell-start :config config))))
         (when (buffer-live-p buf)
           (with-current-buffer buf
             (when use-current-dir
@@ -1185,12 +1187,7 @@ Returns the buffer name of the new session, or nil if folder doesn't exist."
                 (apply #'meta-agent-shell--call-start-function
                        meta-agent-shell-start-function-args))
           (when initial-message
-            (run-at-time 0.5 nil
-                         (lambda (buf msg)
-                           (when (buffer-live-p buf)
-                             (with-current-buffer buf
-                               (shell-maker-submit :input msg))))
-                         buf initial-message))
+            (agent-shell-insert :text initial-message :submit t :no-focus t :shell-buffer buf))
           (buffer-name buf))
       (message "Directory does not exist: %s" dir)
       nil)))
@@ -1275,12 +1272,7 @@ Note: `meta-agent-shell-start-function' must:
             (when initial-message
               (puthash actual-buffer-name initial-message
                        meta-agent-shell--initial-tasks)
-              (run-at-time 0.5 nil
-                           (lambda (buf msg)
-                             (when (buffer-live-p buf)
-                               (with-current-buffer buf
-                                 (shell-maker-submit :input msg))))
-                           buf initial-message))
+              (agent-shell-insert :text initial-message :submit t :no-focus t :shell-buffer buf))
             actual-buffer-name))
       (message "Directory does not exist: %s" dir)
       nil)))
